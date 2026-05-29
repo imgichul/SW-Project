@@ -12,7 +12,34 @@
   </header>
 
   <main class="container">
-    <h2>판매글 등록 페이지</h2>
+    <div class="form-box">
+      <h2>판매글 등록</h2>
+
+      <form id="postForm">
+        <label for="title">제목</label>
+        <input type="text" id="title" placeholder="예: 아이패드 에어 5세대 판매합니다" required>
+
+        <label for="price">가격</label>
+        <input type="number" id="price" placeholder="예: 550000" required>
+
+        <label for="category">카테고리</label>
+        <select id="category" required>
+          <option value="">카테고리 선택</option>
+          <option value="전자기기">전자기기</option>
+          <option value="전공책">전공책</option>
+          <option value="필기구">필기구</option>
+          <option value="생활용품">생활용품</option>
+          <option value="기타">기타</option>
+        </select>
+
+        <label for="description">설명</label>
+        <textarea id="description" rows="6" placeholder="물품 상태, 사용 기간, 거래 방법 등을 입력하세요" required></textarea>
+
+        <button type="submit" class="submit-btn">등록하기</button>
+      </form>
+
+      <a href="posts.html" class="back-link">목록으로 돌아가기</a>
+    </div>
   </main>
 
   <script src="js/storage.js"></script>
