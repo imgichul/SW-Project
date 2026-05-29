@@ -158,3 +158,208 @@ header p {
   border-top: 1px solid #f0f0f0;
   padding-top: 10px;
 }
+
+/* ===== 판매글 목록 상단 영역 ===== */
+
+.page-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.page-top h2 {
+  font-size: 1.5rem;
+}
+
+.write-btn {
+  background-color: #4A90E2;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.write-btn:hover {
+  background-color: #357ABD;
+}
+
+/* ===== 판매글 등록 / 수정 폼 ===== */
+
+.form-box {
+  max-width: 700px;
+  margin: 0 auto;
+  background-color: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.form-box h2 {
+  margin-bottom: 20px;
+}
+
+.form-box label {
+  display: block;
+  margin: 15px 0 6px;
+  font-weight: bold;
+}
+
+.form-box input,
+.form-box select,
+.form-box textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.form-box textarea {
+  resize: vertical;
+}
+
+.submit-btn,
+.cancel-btn,
+.delete-btn {
+  margin-top: 20px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.submit-btn {
+  background-color: #4A90E2;
+  color: white;
+}
+
+.submit-btn:hover {
+  background-color: #357ABD;
+}
+
+.cancel-btn {
+  background-color: #ddd;
+  color: #333;
+}
+
+.delete-btn {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.delete-btn:hover {
+  background-color: #c0392b;
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 20px;
+  color: #4A90E2;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+/* ===== 판매글 목록 상태 표시 ===== */
+
+.empty-message {
+  grid-column: 1 / -1;
+  background-color: white;
+  padding: 40px;
+  text-align: center;
+  color: #777;
+  border-radius: 12px;
+}
+
+.status-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-left: 5px;
+  margin-bottom: 8px;
+  font-weight: bold;
+  background-color: #f1f3f5;
+  color: #555;
+}
+
+.badge-etc {
+  background-color: #f3e5f5;
+  color: #6a1b9a;
+}
+
+/* ===== 판매글 상세 페이지 ===== */
+
+.detail-box {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 30px;
+  background-color: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.detail-image {
+  min-height: 350px;
+  background-color: #e9ecef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #adb5bd;
+  font-weight: bold;
+  border-radius: 12px;
+}
+
+.detail-info h2 {
+  margin: 15px 0 10px;
+  font-size: 1.8rem;
+}
+
+.detail-price {
+  font-size: 1.6rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.detail-info p {
+  margin: 8px 0;
+}
+
+.detail-description {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.detail-description h3 {
+  margin-bottom: 10px;
+}
+
+.detail-buttons {
+  margin-top: 25px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.hidden {
+  display: none;
+}
+
+/* ===== 반응형 ===== */
+
+@media (max-width: 768px) {
+  .detail-box {
+    grid-template-columns: 1fr;
+  }
+
+  .page-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
