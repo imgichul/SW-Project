@@ -1,19 +1,300 @@
-const tabs = document.querySelectorAll('.tab');
-const cards = document.querySelectorAll('.product-card');
+const STORAGE_KEY = "campusMarketPosts";
 
-tabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    tabs.forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
+// localStorage에서 판매글 목록 가져오기
+function getPosts() {
+  const posts = localStorage.getItem(STORAGE_KEY);
+  return posts ? JSON.parse(posts) : [];
+}
 
-    const category = tab.textContent;
+// localStorage에 판매글 목록 저장하기
+function savePosts(posts) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+}
 
-    cards.forEach(card => {
-      if (category === '전체보기' || card.getAttribute('data-category') === category) {
-        card.style.display = 'block';
-      } else {
-        card.style.display = 'none';
-      }
+// 가격 표시 형식 변환
+function formatPrice(price) {
+  return Number(price).toLocaleString("ko-KR") + "원";
+}
+
+// URL에서 판매글 id 가져오기
+function getPostIdFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("id");
+}
+
+// 카테고리별 이미지 문구 반환
+function getCategoryImageText(category) {
+  if (category === "전자기기") return "💻 전자기기 이미지";
+  if (category === "전공책") return "📚 전공책 이미지";
+  if (category === "필기구") return "✏️ 필기구 이미지";
+  if (category === "생활용품") return "🏠 생활용품 이미지";
+  return "🎒 기타 이미지";
+}
+
+// 카테고리별 배지 클래스 반환
+function getBadgeClass(category) {
+  if (category === "전자기기") return "badge-electronic";
+  if (category === "전공책") return "badge-book";
+  if (category === "필기구") return "badge-pencil";
+  return "badge-etc";
+}
+
+// 판매글 등록 기능
+function initPostCreate() {
+  const postForm = document.getElementById("postForm");
+
+  if (!postForm) {
+    return;
+  }
+
+  postForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const title = document.getElementById("title").value.trim();
+    const price = document.getElementById("price").value.trim();
+    const category = document.getElementById("category").value;
+    const description = document.getElementById("description").value.trim();
+
+    if (!title || !price || !category || !description) {
+      alert("모든 항목을 입력해주세요.");
+      return;
+    }
+
+    const newPost = {
+      id: Date.now().toString(),
+      title: title,
+      price: price,
+      category: category,
+      description: description,
+      status: "판매중",
+      createdAt: new Date().toLocaleString("ko-KR")
+    };
+
+    const posts = getPosts();
+    posts.unshift(newPost);
+    savePosts(posts);
+
+    alert("판매글이 등록되었습니다.");
+    window.location.href = "posts.html";
+  });
+}
+
+// 판매글 목록 조회 및 카테고리 필터 기능
+function initPostList() {
+  const postList = document.getElementById("postList");
+
+  if (!postList) {
+    return;
+  }
+
+  const tabs = document.querySelectorAll(".tab");
+  let selectedCategory = "전체보기";
+
+  function renderPostList() {
+    const posts = getPosts();
+
+    const filteredPosts = posts.filter(function (post) {
+      return selectedCategory === "전체보기" || post.category === selectedCategory;
+    });
+
+    postList.innerHTML = "";
+
+    if (filteredPosts.length === 0) {
+      postList.innerHTML = `
+        <div class="empty-message">
+          등록된 판매글이 없습니다.
+        </div>
+      `;
+      return;
+    }
+
+    filteredPosts.forEach(function (post) {
+      const card = document.createElement("div");
+      card.className = "product-card";
+      card.setAttribute("data-category", post.category);
+
+      card.innerHTML = `
+        <div class="product-image">${getCategoryImageText(post.category)}</div>
+        <div class="product-info">
+          <span class="category-badge ${getBadgeClass(post.category)}">${post.category}</span>
+          <span class="status-badge">${post.status}</span>
+          <h3 class="product-title">${post.title}</h3>
+          <div class="product-price">${formatPrice(post.price)}</div>
+          <div class="product-meta">
+            <span>${post.createdAt}</span>
+          </div>
+        </div>
+      `;
+
+      card.addEventListener("click", function () {
+        window.location.href = "post-detail.html?id=" + post.id;
+      });
+
+      postList.appendChild(card);
+    });
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener("click", function () {
+      tabs.forEach(function (item) {
+        item.classList.remove("active");
+      });
+
+      tab.classList.add("active");
+      selectedCategory = tab.dataset.category;
+      renderPostList();
     });
   });
+
+  renderPostList();
+}
+
+// 판매글 상세 조회 기능
+function initPostDetail() {
+  const detailArea = document.getElementById("detailArea");
+
+  if (!detailArea) {
+    return;
+  }
+
+  const postId = getPostIdFromUrl();
+  const posts = getPosts();
+
+  const post = posts.find(function (item) {
+    return item.id === postId;
+  });
+
+  if (!post) {
+    detailArea.innerHTML = `
+      <div class="empty-message">
+        존재하지 않는 판매글입니다.
+        <br><br>
+        <a href="posts.html" class="back-link">목록으로 돌아가기</a>
+      </div>
+    `;
+    return;
+  }
+
+  renderPostDetail(post);
+  initPostEdit(post);
+}
+
+// 상세 화면 출력
+function renderPostDetail(post) {
+  const detailArea = document.getElementById("detailArea");
+
+  detailArea.innerHTML = `
+    <div class="detail-box">
+      <div class="detail-image">${getCategoryImageText(post.category)}</div>
+
+      <div class="detail-info">
+        <span class="category-badge ${getBadgeClass(post.category)}">${post.category}</span>
+        <span class="status-badge">${post.status}</span>
+
+        <h2>${post.title}</h2>
+        <div class="detail-price">${formatPrice(post.price)}</div>
+
+        <p><strong>작성일</strong> ${post.createdAt}</p>
+
+        <div class="detail-description">
+          <h3>상품 설명</h3>
+          <p>${post.description}</p>
+        </div>
+
+        <div class="detail-buttons">
+          <button id="editBtn" class="submit-btn">수정</button>
+          <button id="deleteBtn" class="delete-btn">삭제</button>
+          <a href="posts.html" class="back-link">목록으로</a>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("editBtn").addEventListener("click", function () {
+    showEditForm(post);
+  });
+
+  document.getElementById("deleteBtn").addEventListener("click", function () {
+    deletePost(post.id);
+  });
+}
+
+// 판매글 수정 기능
+function initPostEdit(post) {
+  const editForm = document.getElementById("editForm");
+  const cancelEditBtn = document.getElementById("cancelEditBtn");
+
+  if (!editForm) {
+    return;
+  }
+
+  editForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const posts = getPosts();
+
+    const postIndex = posts.findIndex(function (item) {
+      return item.id === post.id;
+    });
+
+    if (postIndex === -1) {
+      alert("수정할 판매글을 찾을 수 없습니다.");
+      return;
+    }
+
+    posts[postIndex].title = document.getElementById("editTitle").value.trim();
+    posts[postIndex].price = document.getElementById("editPrice").value.trim();
+    posts[postIndex].category = document.getElementById("editCategory").value;
+    posts[postIndex].status = document.getElementById("editStatus").value;
+    posts[postIndex].description = document.getElementById("editDescription").value.trim();
+
+    savePosts(posts);
+
+    alert("판매글이 수정되었습니다.");
+    window.location.href = "post-detail.html?id=" + post.id;
+  });
+
+  cancelEditBtn.addEventListener("click", function () {
+    document.getElementById("editArea").classList.add("hidden");
+    document.getElementById("detailArea").classList.remove("hidden");
+  });
+}
+
+// 수정 폼 보여주기
+function showEditForm(post) {
+  document.getElementById("detailArea").classList.add("hidden");
+  document.getElementById("editArea").classList.remove("hidden");
+
+  document.getElementById("editTitle").value = post.title;
+  document.getElementById("editPrice").value = post.price;
+  document.getElementById("editCategory").value = post.category;
+  document.getElementById("editStatus").value = post.status;
+  document.getElementById("editDescription").value = post.description;
+}
+
+// 판매글 삭제 기능
+function deletePost(postId) {
+  const confirmDelete = confirm("정말 이 판매글을 삭제하시겠습니까?");
+
+  if (!confirmDelete) {
+    return;
+  }
+
+  const posts = getPosts();
+
+  const updatedPosts = posts.filter(function (post) {
+    return post.id !== postId;
+  });
+
+  savePosts(updatedPosts);
+
+  alert("판매글이 삭제되었습니다.");
+  window.location.href = "posts.html";
+}
+
+// 페이지 로드 시 필요한 기능 실행
+document.addEventListener("DOMContentLoaded", function () {
+  initPostCreate();
+  initPostList();
+  initPostDetail();
 });
