@@ -39,6 +39,28 @@ function getBadgeClass(category) {
   return "badge-etc";
 }
 
+// 이미지 파일을 base64 문자열로 변환
+function readImageFile(file) {
+  return new Promise(function (resolve, reject) {
+    if (!file) {
+      resolve("");
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function () {
+      resolve(reader.result);
+    };
+
+    reader.onerror = function () {
+      reject("이미지 파일을 읽는 중 오류가 발생했습니다.");
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
 // 판매글 등록 기능
 function initPostCreate() {
   const postForm = document.getElementById("postForm");
@@ -47,16 +69,26 @@ function initPostCreate() {
     return;
   }
 
-  postForm.addEventListener("submit", function (event) {
+  postForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
     const title = document.getElementById("title").value.trim();
     const price = document.getElementById("price").value.trim();
     const category = document.getElementById("category").value;
     const description = document.getElementById("description").value.trim();
+    const imageFile = document.getElementById("image").files[0];
 
     if (!title || !price || !category || !description) {
       alert("모든 항목을 입력해주세요.");
+      return;
+    }
+
+    let imageData = "";
+
+    try {
+      imageData = await readImageFile(imageFile);
+    } catch (error) {
+      alert(error);
       return;
     }
 
@@ -66,6 +98,7 @@ function initPostCreate() {
       price: price,
       category: category,
       description: description,
+      imageData: imageData,
       status: "판매중",
       createdAt: new Date().toLocaleString("ko-KR")
     };
@@ -114,7 +147,13 @@ function initPostList() {
       card.setAttribute("data-category", post.category);
 
       card.innerHTML = `
-        <div class="product-image">${getCategoryImageText(post.category)}</div>
+        <div class="product-image">
+          ${
+            post.imageData
+              ? `<img src="${post.imageData}" alt="${post.title}" class="product-img">`
+              : getCategoryImageText(post.category)
+            }
+        </div>
         <div class="product-info">
           <span class="category-badge ${getBadgeClass(post.category)}">${post.category}</span>
           <span class="status-badge">${post.status}</span>
@@ -185,8 +224,13 @@ function renderPostDetail(post) {
 
   detailArea.innerHTML = `
     <div class="detail-box">
-      <div class="detail-image">${getCategoryImageText(post.category)}</div>
-
+      <div class="detail-image">
+        ${
+          post.imageData
+             ? `<img src="${post.imageData}" alt="${post.title}" class="detail-img">`
+             : getCategoryImageText(post.category)
+        }
+      </div>
       <div class="detail-info">
         <span class="category-badge ${getBadgeClass(post.category)}">${post.category}</span>
         <span class="status-badge">${post.status}</span>
@@ -228,7 +272,7 @@ function initPostEdit(post) {
     return;
   }
 
-  editForm.addEventListener("submit", function (event) {
+  editForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
     const posts = getPosts();
@@ -247,7 +291,16 @@ function initPostEdit(post) {
     posts[postIndex].category = document.getElementById("editCategory").value;
     posts[postIndex].status = document.getElementById("editStatus").value;
     posts[postIndex].description = document.getElementById("editDescription").value.trim();
+    const editImageFile = document.getElementById("editImage").files[0];
 
+    if (editImageFile) {
+      try {
+        posts[postIndex].imageData = await readImageFile(editImageFile);
+      } catch (error) {
+        alert(error);
+        return;
+      }
+    }
     savePosts(posts);
 
     alert("판매글이 수정되었습니다.");
