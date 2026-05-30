@@ -12,7 +12,21 @@
   </header>
 
   <main class="container">
-    <h2>판매글 목록 페이지</h2>
+    <div class="page-top">
+      <h2>판매글 목록</h2>
+      <a href="post-new.html" class="write-btn">판매글 등록</a>
+    </div>
+
+    <div class="category-tabs">
+      <div class="tab active" data-category="전체보기">전체보기</div>
+      <div class="tab" data-category="전자기기">전자기기</div>
+      <div class="tab" data-category="전공책">전공책</div>
+      <div class="tab" data-category="필기구">필기구</div>
+      <div class="tab" data-category="생활용품">생활용품</div>
+      <div class="tab" data-category="기타">기타</div>
+    </div>
+
+    <div id="postList" class="product-grid"></div>
   </main>
 
   <script src="js/storage.js"></script>

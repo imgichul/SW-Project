@@ -12,7 +12,43 @@
   </header>
 
   <main class="container">
-    <h2>판매글 상세 페이지</h2>
+    <!-- 판매글 상세 정보가 표시되는 영역 -->
+    <div id="detailArea"></div>
+
+    <!-- 판매글 수정 폼 영역 -->
+    <div id="editArea" class="form-box hidden">
+      <h2>판매글 수정</h2>
+
+      <form id="editForm">
+        <label for="editTitle">제목</label>
+        <input type="text" id="editTitle" required>
+
+        <label for="editPrice">가격</label>
+        <input type="number" id="editPrice" required>
+
+        <label for="editCategory">카테고리</label>
+        <select id="editCategory" required>
+          <option value="전자기기">전자기기</option>
+          <option value="전공책">전공책</option>
+          <option value="필기구">필기구</option>
+          <option value="생활용품">생활용품</option>
+          <option value="기타">기타</option>
+        </select>
+
+        <label for="editStatus">거래 상태</label>
+        <select id="editStatus" required>
+          <option value="판매중">판매중</option>
+          <option value="예약중">예약중</option>
+          <option value="거래완료">거래완료</option>
+        </select>
+
+        <label for="editDescription">설명</label>
+        <textarea id="editDescription" rows="6" required></textarea>
+
+        <button type="submit" class="submit-btn">수정 완료</button>
+        <button type="button" id="cancelEditBtn" class="cancel-btn">취소</button>
+      </form>
+    </div>
   </main>
 
   <script src="js/storage.js"></script>
