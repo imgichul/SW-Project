@@ -1,22 +1,23 @@
+// localStorage에 저장할 판매글 데이터의 key 값
 const STORAGE_KEY = "campusMarketPosts";
 
-// localStorage에서 판매글 목록 가져오기
+// localStorage에서 판매글 목록을 가져오는 함수
 function getPosts() {
   const posts = localStorage.getItem(STORAGE_KEY);
   return posts ? JSON.parse(posts) : [];
 }
 
-// localStorage에 판매글 목록 저장하기
+// localStorage에 판매글 목록 저장하는 함수
 function savePosts(posts) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
 }
 
-// 가격 표시 형식 변환
+// 가격 표시 형식 변환하는 함수
 function formatPrice(price) {
   return Number(price).toLocaleString("ko-KR") + "원";
 }
 
-// URL에서 판매글 id 가져오기
+// URL에서 판매글 id 가져오는 함수
 function getPostIdFromUrl() {
   const params = new URLSearchParams(window.location.search);
   return params.get("id");
@@ -39,7 +40,7 @@ function getBadgeClass(category) {
   return "badge-etc";
 }
 
-// 이미지 파일을 base64 문자열로 변환
+// 이미지 파일을 base64 문자열로 변환하는 함수
 function readImageFile(file) {
   return new Promise(function (resolve, reject) {
     if (!file) {
@@ -61,7 +62,7 @@ function readImageFile(file) {
   });
 }
 
-// 판매글 등록 기능
+// 판매글 등록 페이지에서 입력한 내용을 읽어 localStorage에 저장하는 함수
 function initPostCreate() {
   const postForm = document.getElementById("postForm");
 
@@ -112,7 +113,8 @@ function initPostCreate() {
   });
 }
 
-// 판매글 목록 조회 및 카테고리 필터 기능
+// 판매글 목록 페이지에서 localStorage에 저장된 판매글을 카드 형태로 출력하는 함수
+// 카테고리 탭을 클릭하면 선택한 카테고리에 해당하는 판매글만 보여줌
 function initPostList() {
   const postList = document.getElementById("postList");
 
@@ -188,7 +190,7 @@ function initPostList() {
   renderPostList();
 }
 
-// 판매글 상세 조회 기능
+// 판매글 상세 페이지에서 URL의 id 값을 기준으로 해당 판매글을 찾아 출력하는 함수
 function initPostDetail() {
   const detailArea = document.getElementById("detailArea");
 
@@ -264,6 +266,7 @@ function renderPostDetail(post) {
 }
 
 // 판매글 수정 기능
+// 상세 페이지의 수정 폼에서 입력한 내용으로 기존 판매글 데이터를 갱신하는 함수
 function initPostEdit(post) {
   const editForm = document.getElementById("editForm");
   const cancelEditBtn = document.getElementById("cancelEditBtn");
@@ -326,6 +329,7 @@ function showEditForm(post) {
 }
 
 // 판매글 삭제 기능
+// 선택한 판매글을 localStorage에서 삭제하는 함수
 function deletePost(postId) {
   const confirmDelete = confirm("정말 이 판매글을 삭제하시겠습니까?");
 
@@ -345,7 +349,8 @@ function deletePost(postId) {
   window.location.href = "posts.html";
 }
 
-// 페이지 로드 시 필요한 기능 실행
+// 페이지 로드가 완료되면 현재 페이지에 필요한 기능만 실행.
+// 각 함수는 해당 HTML 요소가 없으면 바로 종료되므로 여러 페이지에서 같은 posts.js를 사용할 수 있습니다.
 document.addEventListener("DOMContentLoaded", function () {
   initPostCreate();
   initPostList();
