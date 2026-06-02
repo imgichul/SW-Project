@@ -351,3 +351,40 @@ document.addEventListener("DOMContentLoaded", function () {
   initPostList();
   initPostDetail();
 });
+
+// DOM 요소 가져오기
+const searchInput = document.getElementById('searchInput');
+const searchBtn = document.getElementById('searchBtn');
+
+// 예시: 필터링 및 렌더링을 담당하는 함수가 있다면
+function filterAndRenderPosts() {
+  const activeCategory = document.querySelector('.tab.active').dataset.category;
+  const keyword = searchInput.value.trim().toLowerCase(); // 대소문자 구분 없이 검색
+
+  // 전체 데이터(모든 판매글)에서 필터링
+  const filtered = allPosts.filter(post => {
+    // 1. 카테고리 매칭 확인
+    const matchCategory = (activeCategory === '전체보기' || post.category === activeCategory);
+    
+    // 2. 직접 입력 검색어 매칭 확인 (제목이나 내용에 키워드가 포함되는지)
+    const matchKeyword = post.title.toLowerCase().includes(keyword) || 
+                         post.content.toLowerCase().includes(keyword);
+
+    return matchCategory && matchKeyword;
+  });
+
+  // 필터링된 데이터로 화면 그리거나 기존 렌더링 함수 호출
+  displayPosts(filtered); 
+}
+
+// 이벤트 리스너 등록
+searchBtn.addEventListener('click', filterAndRenderPosts);
+
+// 엔터키를 눌러도 검색되도록 처리
+searchInput.addEventListener('keyup', (e) => {
+  if (e.key === 'Enter') {
+    filterAndRenderPosts();
+  }
+});
+
+// 기존 카테고리 탭 클릭 이벤트가 있다면, 클릭 시 searchInput.value = '' 로 초기화해주면 더 깔끔합니다!

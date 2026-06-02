@@ -687,3 +687,43 @@ header p {
     text-align: center;
   }
 }
+
+/* 검색창 컨테이너 */
+.search-container {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+  gap: 10px;
+}
+
+/* 검색 입력 필드 */
+#searchInput {
+  width: 100%;
+  max-width: 400px;
+  padding: 12px 16px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 25px; /* 카테고리 탭처럼 둥글게 */
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+#searchInput:focus {
+  border-color: #4a90e2; /* 포커스 시 강조 컬러 */
+}
+
+/* 검색 버튼 */
+#searchBtn {
+  padding: 0 20px;
+  font-size: 14px;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#searchBtn:hover {
+  background-color: #357abd;
+}
