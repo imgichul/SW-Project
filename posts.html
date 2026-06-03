@@ -26,9 +26,46 @@
       <div class="tab" data-category="기타">기타</div>
     </div>
     <div class="search-container">
+      <div class="search-box">
         <input type="text" id="searchInput" placeholder="검색어를 직접 입력하세요 (예: 아이패드, 전공책...)">
         <button id="searchBtn">검색</button>
+        <button id="filterToggleBtn" class="filter-toggle-btn">상세 검색</button>
       </div>
+    </div>
+
+    <div id="filterPanel" class="filter-panel hidden">
+      <div class="filter-row">
+        <div class="filter-group">
+          <label>정렬 기준</label>
+          <select id="sortSelect">
+            <option value="latest">최신 업로드 순</option>
+            <option value="oldest">예전 업로드 순</option>
+            <option value="priceHigh">가격 높은 순</option>
+            <option value="priceLow">가격 낮은 순</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>금액 범위(직접입력 or 5000원 단위로 조정)</label>
+          <div class="range-inputs">
+            <input type="number" id="minPrice" placeholder="최소 금액 (원)" step="5000", min="0">
+            <span>~</span>
+            <input type="number" id="maxPrice" placeholder="최대 금액 (원)" step="5000", min="0">
+          </div>
+        </div>
+        <div class="filter-group">
+          <label>업로드 기간</label>
+          <div class="range-inputs">
+            <input type="date" id="startDate">
+            <span>~</span>
+            <input type="date" id="endDate">
+          </div>
+        </div>
+      </div>
+      <div class="filter-actions">
+        <button id="resetFilterBtn" class="reset-btn">필터 초기화</button>
+        <button id="applyFilterBtn" class="apply-btn">필터 적용</button>
+      </div>
+    </div>
     <div id="postList" class="product-grid"></div>
   </main>
 
