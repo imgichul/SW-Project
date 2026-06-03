@@ -463,3 +463,72 @@ document.addEventListener("DOMContentLoaded", function () {
   initPostList();
   initPostDetail();
 });
+
+// DOM 요소 연결
+const filterToggleBtn = document.getElementById('filterToggleBtn');
+const filterPanel = document.getElementById('filterPanel');
+const applyFilterBtn = document.getElementById('applyFilterBtn');
+const resetFilterBtn = document.getElementById('resetFilterBtn');
+
+// 1. 상세 검색 패널 토글 (열고 닫기)
+filterToggleBtn.addEventListener('click', () => {
+  filterPanel.classList.toggle('hidden');
+});
+
+// 2. 필터를 적용해서 렌더링하는 핵심 로직 확장
+function filterAndRenderPosts() {
+  const activeCategory = document.querySelector('.tab.active').dataset.category;
+  const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+  
+  // 상세 필터 값 가져오기
+  const sortValue = document.getElementById('sortSelect').value;
+  const minPrice = parseInt(document.getElementById('minPrice').value) || 0;
+  const maxPrice = parseInt(document.getElementById('maxPrice').value) || Infinity;
+  const startDate = document.getElementById('startDate').value;
+  const endDate = document.getElementById('endDate').value;
+
+  // [조건 필터링] 카테고리 + 키워드 + 금액 + 날짜 범위
+  let filtered = allPosts.filter(post => {
+    // 카테고리 & 키워드 매칭
+    const matchCategory = (activeCategory === '전체보기' || post.category === activeCategory);
+    const matchKeyword = post.title.toLowerCase().includes(keyword) || post.content.toLowerCase().includes(keyword);
+    
+    // 금액 범위 매칭 (post.price가 있다고 가정)
+    const postPrice = parseInt(post.price) || 0;
+    const matchPrice = (postPrice >= minPrice && postPrice <= maxPrice);
+    
+    // 날짜 범위 매칭 (post.date가 '2026-06-03' 같은 문자열 형태라고 가정)
+    let matchDate = true;
+    if (startDate && post.date < startDate) matchDate = false;
+    if (endDate && post.date > endDate) matchDate = false;
+
+    return matchCategory && matchKeyword && matchPrice && matchDate;
+  });
+
+  // [정렬 필터링] 가격순, 날짜순 정렬 처리
+  if (sortValue === 'latest') {
+    filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+  } else if (sortValue === 'oldest') {
+    filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+  } else if (sortValue === 'priceHigh') {
+    filtered.sort((a, b) => b.price - a.price);
+  } else if (sortValue === 'priceLow') {
+    filtered.sort((a, b) => a.price - b.price);
+  }
+
+  // 화면에 그리기
+  displayPosts(filtered);
+}
+
+// 3. 버튼 이벤트 리스너 연결
+applyFilterBtn.addEventListener('click', filterAndRenderPosts);
+
+// 초기화 버튼 클릭 시 모든 필터 초기 상태로 리셋
+resetFilterBtn.addEventListener('click', () => {
+  document.getElementById('sortSelect').value = 'latest';
+  document.getElementById('minPrice').value = '';
+  document.getElementById('maxPrice').value = '';
+  document.getElementById('startDate').value = '';
+  document.getElementById('endDate').value = '';
+  filterAndRenderPosts(); // 필터 리셋 후 재렌더링
+});
