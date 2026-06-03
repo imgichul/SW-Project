@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>회원가입</title>
+  <title>회원가입 - 캠퍼스 중고 마트</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -12,7 +12,36 @@
   </header>
 
   <main class="container">
-    <h2>회원가입 페이지</h2>
+    <div class="form-box">
+      <h2>회원가입 페이지</h2>
+      
+      <!-- 회원가입 폼 시작 -->
+      <form id="signupForm" action="#" method="POST">
+        <label for="username">아이디</label>
+        <input type="text" id="username" name="username" placeholder="사용할 아이디를 입력하세요" required>
+
+        <label for="password">비밀번호</label>
+        <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요" required>
+
+        <label for="passwordConfirm">비밀번호 확인</label>
+        <input type="password" id="passwordConfirm" name="passwordConfirm" placeholder="비밀번호를 다시 한 번 입력하세요" required>
+
+        <label for="nickname">닉네임</label>
+        <input type="text" id="nickname" name="nickname" placeholder="사이트에서 사용할 닉네임을 입력하세요" required>
+
+        <label for="studentId">학번 (또는 학교 이메일)</label>
+        <input type="text" id="studentId" name="studentId" placeholder="예: 20241234 또는 email@univ.ac.kr" required>
+
+        <button type="submit" class="submit-btn" style="margin-top: 15px;">가입하기</button>
+      </form>
+      <!-- 회원가입 폼 끝 -->
+
+      <!-- 로그인 페이지로 돌아가기 링크 -->
+      <p style="text-align: center; margin-top: 20px; font-size: 14px;">
+        이미 계정이 있으신가요? 
+        <a href="login.html" style="color: #007bff; text-decoration: none; font-weight: bold;">로그인하기</a>
+      </p>
+    </div>
   </main>
 
   <script src="js/auth.js"></script>
