@@ -1,6 +1,9 @@
 // localStorage에 저장할 판매글 데이터의 key 값
 const STORAGE_KEY = "campusMarketPosts";
 
+// 거래 상태 값
+const TRADE_STATUSES = ["판매중", "예약중", "거래완료"];
+
 // localStorage에서 판매글 목록을 가져오는 함수
 function getPosts() {
   const posts = localStorage.getItem(STORAGE_KEY);
@@ -21,6 +24,11 @@ function formatPrice(price) {
 function getPostIdFromUrl() {
   const params = new URLSearchParams(window.location.search);
   return params.get("id");
+}
+
+// 판매글 거래 상태 기본값 반환
+function getPostStatus(post) {
+  return post.status || "판매중";
 }
 
 // 카테고리별 이미지 문구 반환
@@ -114,7 +122,6 @@ function initPostCreate() {
 }
 
 // 판매글 목록 페이지에서 localStorage에 저장된 판매글을 카드 형태로 출력하는 함수
-// 카테고리 탭을 클릭하면 선택한 카테고리에 해당하는 판매글만 보여줌
 function initPostList() {
   const postList = document.getElementById("postList");
 
@@ -123,13 +130,32 @@ function initPostList() {
   }
 
   const tabs = document.querySelectorAll(".tab");
+  const searchInput = document.getElementById("searchInput");
+  const searchBtn = document.getElementById("searchBtn");
+  const statusFilter = document.getElementById("statusFilter");
+
   let selectedCategory = "전체보기";
 
   function renderPostList() {
     const posts = getPosts();
+    const keyword = searchInput ? searchInput.value.trim().toLowerCase() : "";
+    const selectedStatus = statusFilter ? statusFilter.value : "전체";
 
     const filteredPosts = posts.filter(function (post) {
-      return selectedCategory === "전체보기" || post.category === selectedCategory;
+      const postStatus = getPostStatus(post);
+
+      const matchCategory =
+        selectedCategory === "전체보기" || post.category === selectedCategory;
+
+      const matchKeyword =
+        !keyword ||
+        post.title.toLowerCase().includes(keyword) ||
+        post.description.toLowerCase().includes(keyword);
+
+      const matchStatus =
+        selectedStatus === "전체" || postStatus === selectedStatus;
+
+      return matchCategory && matchKeyword && matchStatus;
     });
 
     postList.innerHTML = "";
@@ -154,11 +180,11 @@ function initPostList() {
             post.imageData
               ? `<img src="${post.imageData}" alt="${post.title}" class="product-img">`
               : getCategoryImageText(post.category)
-            }
+          }
         </div>
         <div class="product-info">
           <span class="category-badge ${getBadgeClass(post.category)}">${post.category}</span>
-          <span class="status-badge">${post.status}</span>
+          <span class="status-badge">${getPostStatus(post)}</span>
           <h3 class="product-title">${post.title}</h3>
           <div class="product-price">${formatPrice(post.price)}</div>
           <div class="product-meta">
@@ -186,6 +212,20 @@ function initPostList() {
       renderPostList();
     });
   });
+
+  if (searchBtn && searchInput) {
+    searchBtn.addEventListener("click", renderPostList);
+
+    searchInput.addEventListener("keyup", function (event) {
+      if (event.key === "Enter") {
+        renderPostList();
+      }
+    });
+  }
+
+  if (statusFilter) {
+    statusFilter.addEventListener("change", renderPostList);
+  }
 
   renderPostList();
 }
@@ -229,18 +269,28 @@ function renderPostDetail(post) {
       <div class="detail-image">
         ${
           post.imageData
-             ? `<img src="${post.imageData}" alt="${post.title}" class="detail-img">`
-             : getCategoryImageText(post.category)
+            ? `<img src="${post.imageData}" alt="${post.title}" class="detail-img">`
+            : getCategoryImageText(post.category)
         }
       </div>
       <div class="detail-info">
         <span class="category-badge ${getBadgeClass(post.category)}">${post.category}</span>
-        <span class="status-badge">${post.status}</span>
+        <span class="status-badge">${getPostStatus(post)}</span>
 
         <h2>${post.title}</h2>
         <div class="detail-price">${formatPrice(post.price)}</div>
 
         <p><strong>작성일</strong> ${post.createdAt}</p>
+
+        <div class="status-change-box">
+          <label for="tradeStatus"><strong>거래 상태</strong></label>
+          <select id="tradeStatus">
+            <option value="판매중" ${getPostStatus(post) === "판매중" ? "selected" : ""}>판매중</option>
+            <option value="예약중" ${getPostStatus(post) === "예약중" ? "selected" : ""}>예약중</option>
+            <option value="거래완료" ${getPostStatus(post) === "거래완료" ? "selected" : ""}>거래완료</option>
+          </select>
+          <button id="statusUpdateBtn" class="submit-btn">상태 변경</button>
+        </div>
 
         <div class="detail-description">
           <h3>상품 설명</h3>
@@ -256,6 +306,10 @@ function renderPostDetail(post) {
     </div>
   `;
 
+  document.getElementById("statusUpdateBtn").addEventListener("click", function () {
+    updateTradeStatus(post.id);
+  });
+
   document.getElementById("editBtn").addEventListener("click", function () {
     showEditForm(post);
   });
@@ -263,6 +317,40 @@ function renderPostDetail(post) {
   document.getElementById("deleteBtn").addEventListener("click", function () {
     deletePost(post.id);
   });
+}
+
+// 거래 상태 변경 기능
+function updateTradeStatus(postId) {
+  const tradeStatus = document.getElementById("tradeStatus");
+
+  if (!tradeStatus) {
+    alert("거래 상태 선택창을 찾을 수 없습니다.");
+    return;
+  }
+
+  const selectedStatus = tradeStatus.value;
+
+  if (!TRADE_STATUSES.includes(selectedStatus)) {
+    alert("올바르지 않은 거래 상태입니다.");
+    return;
+  }
+
+  const posts = getPosts();
+
+  const postIndex = posts.findIndex(function (post) {
+    return post.id === postId;
+  });
+
+  if (postIndex === -1) {
+    alert("판매글을 찾을 수 없습니다.");
+    return;
+  }
+
+  posts[postIndex].status = selectedStatus;
+  savePosts(posts);
+
+  alert("거래 상태가 변경되었습니다.");
+  window.location.href = "post-detail.html?id=" + postId;
 }
 
 // 판매글 수정 기능
@@ -289,12 +377,23 @@ function initPostEdit(post) {
       return;
     }
 
-    posts[postIndex].title = document.getElementById("editTitle").value.trim();
-    posts[postIndex].price = document.getElementById("editPrice").value.trim();
-    posts[postIndex].category = document.getElementById("editCategory").value;
-    posts[postIndex].status = document.getElementById("editStatus").value;
-    posts[postIndex].description = document.getElementById("editDescription").value.trim();
+    const editTitle = document.getElementById("editTitle").value.trim();
+    const editPrice = document.getElementById("editPrice").value.trim();
+    const editCategory = document.getElementById("editCategory").value;
+    const editDescription = document.getElementById("editDescription").value.trim();
+    const editStatus = document.getElementById("editStatus");
     const editImageFile = document.getElementById("editImage").files[0];
+
+    if (!editTitle || !editPrice || !editCategory || !editDescription) {
+      alert("모든 항목을 입력해주세요.");
+      return;
+    }
+
+    posts[postIndex].title = editTitle;
+    posts[postIndex].price = editPrice;
+    posts[postIndex].category = editCategory;
+    posts[postIndex].status = editStatus ? editStatus.value : getPostStatus(posts[postIndex]);
+    posts[postIndex].description = editDescription;
 
     if (editImageFile) {
       try {
@@ -304,16 +403,19 @@ function initPostEdit(post) {
         return;
       }
     }
+
     savePosts(posts);
 
     alert("판매글이 수정되었습니다.");
     window.location.href = "post-detail.html?id=" + post.id;
   });
 
-  cancelEditBtn.addEventListener("click", function () {
-    document.getElementById("editArea").classList.add("hidden");
-    document.getElementById("detailArea").classList.remove("hidden");
-  });
+  if (cancelEditBtn) {
+    cancelEditBtn.addEventListener("click", function () {
+      document.getElementById("editArea").classList.add("hidden");
+      document.getElementById("detailArea").classList.remove("hidden");
+    });
+  }
 }
 
 // 수정 폼 보여주기
@@ -324,7 +426,12 @@ function showEditForm(post) {
   document.getElementById("editTitle").value = post.title;
   document.getElementById("editPrice").value = post.price;
   document.getElementById("editCategory").value = post.category;
-  document.getElementById("editStatus").value = post.status;
+
+  const editStatus = document.getElementById("editStatus");
+  if (editStatus) {
+    editStatus.value = getPostStatus(post);
+  }
+
   document.getElementById("editDescription").value = post.description;
 }
 
@@ -356,40 +463,3 @@ document.addEventListener("DOMContentLoaded", function () {
   initPostList();
   initPostDetail();
 });
-
-// DOM 요소 가져오기
-const searchInput = document.getElementById('searchInput');
-const searchBtn = document.getElementById('searchBtn');
-
-// 예시: 필터링 및 렌더링을 담당하는 함수가 있다면
-function filterAndRenderPosts() {
-  const activeCategory = document.querySelector('.tab.active').dataset.category;
-  const keyword = searchInput.value.trim().toLowerCase(); // 대소문자 구분 없이 검색
-
-  // 전체 데이터(모든 판매글)에서 필터링
-  const filtered = allPosts.filter(post => {
-    // 1. 카테고리 매칭 확인
-    const matchCategory = (activeCategory === '전체보기' || post.category === activeCategory);
-    
-    // 2. 직접 입력 검색어 매칭 확인 (제목이나 내용에 키워드가 포함되는지)
-    const matchKeyword = post.title.toLowerCase().includes(keyword) || 
-                         post.content.toLowerCase().includes(keyword);
-
-    return matchCategory && matchKeyword;
-  });
-
-  // 필터링된 데이터로 화면 그리거나 기존 렌더링 함수 호출
-  displayPosts(filtered); 
-}
-
-// 이벤트 리스너 등록
-searchBtn.addEventListener('click', filterAndRenderPosts);
-
-// 엔터키를 눌러도 검색되도록 처리
-searchInput.addEventListener('keyup', (e) => {
-  if (e.key === 'Enter') {
-    filterAndRenderPosts();
-  }
-});
-
-// 기존 카테고리 탭 클릭 이벤트가 있다면, 클릭 시 searchInput.value = '' 로 초기화해주면 더 깔끔합니다!
