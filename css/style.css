@@ -645,6 +645,22 @@ header p {
   display: none;
 }
 
+/* ===== Footer ===== */
+
+.footer {
+  margin-top: 60px;
+  padding: 24px 20px;
+  text-align: center;
+  color: #777;
+  background-color: white;
+  border-top: 1px solid #e5e5e5;
+}
+
+.footer p {
+  margin: 4px 0;
+  font-size: 0.9rem;
+}
+
 /* ===== 반응형 ===== */
 
 @media (max-width: 768px) {

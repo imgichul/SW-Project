@@ -21,7 +21,7 @@
         <input type="text" id="title" placeholder="예: 아이패드 에어 5세대 판매합니다" required>
 
         <label for="price">가격</label>
-        <input type="number" id="price" placeholder="예: 550000" required>
+        <input type="number" id="price" min="0" step="1000" placeholder="예: 550000" required>
 
         <label for="category">카테고리</label>
         <select id="category" required>
@@ -46,6 +46,10 @@
       <a href="posts.html" class="back-link">목록으로 돌아가기</a>
     </div>
   </main>
+
+  <footer class="footer">
+    <p>© 2026 Campus Market. All rights reserved.</p>
+  </footer>
 
   <script src="js/storage.js"></script>
   <script src="js/posts.js"></script>
