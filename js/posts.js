@@ -85,9 +85,11 @@ function initPostCreate() {
     const price = document.getElementById("price").value.trim();
     const category = document.getElementById("category").value;
     const description = document.getElementById("description").value.trim();
+    const location = document.getElementById("location").value.trim();
+    const contact = document.getElementById("contact").value.trim();
     const imageFile = document.getElementById("image").files[0];
 
-    if (!title || !price || !category || !description) {
+    if (!title || !price || !category || !description || !location || !contact) {
       alert("모든 항목을 입력해주세요.");
       return;
     }
@@ -189,6 +191,7 @@ function initPostList() {
           <div class="product-price">${formatPrice(post.price)}</div>
           <div class="product-meta">
             <span>${post.createdAt}</span>
+            <span>${post.location || "장소 미정"}</span>
           </div>
         </div>
       `;
@@ -281,6 +284,8 @@ function renderPostDetail(post) {
         <div class="detail-price">${formatPrice(post.price)}</div>
 
         <p><strong>작성일</strong> ${post.createdAt}</p>
+        <p><strong>거래 장소</strong> ${post.location || "장소 미정"}</p>
+        <p><strong>연락처</strong> ${post.contact || "연락처 미입력"}</p>
 
         <div class="status-change-box">
           <label for="tradeStatus"><strong>거래 상태</strong></label>
@@ -380,11 +385,13 @@ function initPostEdit(post) {
     const editTitle = document.getElementById("editTitle").value.trim();
     const editPrice = document.getElementById("editPrice").value.trim();
     const editCategory = document.getElementById("editCategory").value;
+    const editLocation = document.getElementById("editLocation").value.trim();
+    const editContact = document.getElementById("editContact").value.trim();
     const editDescription = document.getElementById("editDescription").value.trim();
     const editStatus = document.getElementById("editStatus");
     const editImageFile = document.getElementById("editImage").files[0];
 
-    if (!editTitle || !editPrice || !editCategory || !editDescription) {
+    if (!editTitle || !editPrice || !editCategory || !editDescription || !editLocation || !editContact) {
       alert("모든 항목을 입력해주세요.");
       return;
     }
@@ -392,6 +399,8 @@ function initPostEdit(post) {
     posts[postIndex].title = editTitle;
     posts[postIndex].price = editPrice;
     posts[postIndex].category = editCategory;
+    posts[postIndex].location = editLocation;
+    posts[postIndex].contact = editContact;
     posts[postIndex].status = editStatus ? editStatus.value : getPostStatus(posts[postIndex]);
     posts[postIndex].description = editDescription;
 
@@ -426,6 +435,8 @@ function showEditForm(post) {
   document.getElementById("editTitle").value = post.title;
   document.getElementById("editPrice").value = post.price;
   document.getElementById("editCategory").value = post.category;
+  document.getElementById("editLocation").value = post.location || "";
+  document.getElementById("editContact").value = post.contact || "";
 
   const editStatus = document.getElementById("editStatus");
   if (editStatus) {
