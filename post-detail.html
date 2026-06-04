@@ -24,7 +24,7 @@
         <input type="text" id="editTitle" required>
 
         <label for="editPrice">가격</label>
-        <input type="number" id="editPrice" required>
+        <input type="number" id="editPrice" min="0" step="1000" required>
 
         <label for="editCategory">카테고리</label>
         <select id="editCategory" required>
@@ -54,6 +54,10 @@
       </form>
     </div>
   </main>
+
+  <footer class="footer">
+    <p>© 2026 Campus Market. All rights reserved.</p>
+  </footer>
 
   <script src="js/storage.js"></script>
   <script src="js/posts.js"></script>
