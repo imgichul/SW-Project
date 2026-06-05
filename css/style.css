@@ -206,6 +206,29 @@ header p {
   transform: translateY(-2px);
 }
 
+.page-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.home-btn {
+  display: inline-block;
+  background-color: #eef5ff;
+  color: #4A90E2;
+  padding: 11px 18px;
+  border: 1px solid #cfe0f7;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.home-btn:hover {
+  background-color: #dcecff;
+  transform: translateY(-2px);
+}
+
 /* ===== 메인 페이지 소개 영역 ===== */
 
 .main-intro {
@@ -680,6 +703,16 @@ header p {
   }
 
   .write-btn {
+    width: 100%;
+    text-align: center;
+  }
+  
+    .page-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .home-btn {
     width: 100%;
     text-align: center;
   }
