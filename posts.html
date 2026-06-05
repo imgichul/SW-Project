@@ -36,6 +36,7 @@
       <div class="tab" data-category="생활용품">생활용품</div>
       <div class="tab" data-category="기타">기타</div>
     </div>
+
     <div class="search-container">
       <div class="search-box">
         <input type="text" id="searchInput" placeholder="검색어를 직접 입력하세요 (예: 아이패드, 전공책...)">
@@ -55,6 +56,17 @@
             <option value="priceLow">가격 낮은 순</option>
           </select>
         </div>
+
+        <div class="filter-group">
+          <label>거래 상태</label>
+          <select id="statusFilter">
+            <option value="전체">전체</option>
+            <option value="판매중">판매중</option>
+            <option value="예약중">예약중</option>
+            <option value="거래완료">거래완료</option>
+          </select>
+        </div>
+
         <div class="filter-group">
           <label>금액 범위(직접입력 or 5000원 단위로 조정)</label>
           <div class="range-inputs">
@@ -63,6 +75,7 @@
             <input type="number" id="maxPrice" placeholder="최대 금액 (원)" step="5000" min="0">
           </div>
         </div>
+
         <div class="filter-group">
           <label>업로드 기간</label>
           <div class="range-inputs">
@@ -72,11 +85,13 @@
           </div>
         </div>
       </div>
+
       <div class="filter-actions">
         <button id="resetFilterBtn" class="reset-btn">필터 초기화</button>
         <button id="applyFilterBtn" class="apply-btn">필터 적용</button>
       </div>
     </div>
+
     <div id="postList" class="product-grid"></div>
   </main>
 
