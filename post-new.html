@@ -21,7 +21,7 @@
         <input type="text" id="title" placeholder="예: 아이패드 에어 5세대 판매합니다" required>
 
         <label for="price">가격</label>
-        <input type="number" id="price" placeholder="예: 550000" required>
+        <input type="number" id="price" min="0" step="1000" placeholder="예: 550000" required>
 
         <label for="category">카테고리</label>
         <select id="category" required>
@@ -32,6 +32,12 @@
           <option value="생활용품">생활용품</option>
           <option value="기타">기타</option>
         </select>
+
+        <label for="location">거래 희망 장소</label>
+        <input type="text" id="location" placeholder="예: 도서관 로비, 학생회관 앞" required>
+
+        <label for="contact">연락처</label>
+        <input type="text" id="contact" placeholder="예: 오픈채팅 링크 또는 전화번호" required>
 
         <!-- 상품 사진 선택: 선택한 이미지는 JavaScript에서 base64로 변환하여 저장 -->
         <label for="image">상품 사진</label>
@@ -47,7 +53,10 @@
     </div>
   </main>
 
-  <script src="js/storage.js"></script>
-  <script src="js/posts.js"></script>
+  <footer class="footer">
+    <p>© 2026 Campus Market. All rights reserved.</p>
+  </footer>
+
+  <script type="module" src="js/posts.js"></script>
 </body>
 </html>

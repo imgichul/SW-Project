@@ -71,28 +71,29 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-// ==========================================
-// 3. 로그인 상태 유지 및 화면 변경 (index.html)
-// ==========================================
-const currentUser = localStorage.getItem('currentUser');
-// index.html에 새로 만든 authArea 박스를 바로 찾습니다.
-const authArea = document.getElementById('authArea'); 
 
-// 로그인 상태이고, 화면에 authArea 박스가 존재한다면 UI 변경
-if (currentUser && authArea) {
-  const userData = JSON.parse(localStorage.getItem(currentUser));
+  // ==========================================
+  // 3. 로그인 상태 유지 및 화면 변경 (index.html)
+  // ==========================================
+  const currentUser = localStorage.getItem('currentUser');
+  // index.html에 새로 만든 authArea 박스를 바로 찾습니다.
+  const authArea = document.getElementById('authArea'); 
 
-  // 부모를 찾을 필요 없이 authArea 박스의 내부를 환영 메시지와 버튼으로 교체합니다.
-  authArea.innerHTML = `
-    <span style="font-weight: bold; margin-right: 15px; color: #fff;">👤 ${userData.nickname}님 환영합니다!</span>
-    <button id="logoutBtn" style="background: #ff4d4d; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">로그아웃</button>
-  `;
+  // 로그인 상태이고, 화면에 authArea 박스가 존재한다면 UI 변경
+  if (currentUser && authArea) {
+    const userData = JSON.parse(localStorage.getItem(currentUser));
 
-  // 로그아웃 버튼 이벤트 연결
-  document.getElementById('logoutBtn').addEventListener('click', function() {
-    localStorage.removeItem('currentUser');
-    alert('로그아웃 되었습니다.');
-    window.location.reload();
-  });
-}
+    // 부모를 찾을 필요 없이 authArea 박스의 내부를 환영 메시지와 버튼으로 교체합니다.
+    authArea.innerHTML = `
+      <span style="font-weight: bold; margin-right: 15px; color: #fff;">👤 ${userData.nickname}님 환영합니다!</span>
+      <button id="logoutBtn" style="background: #ff4d4d; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">로그아웃</button>
+    `;
+
+    // 로그아웃 버튼 이벤트 연결
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+      localStorage.removeItem('currentUser');
+      alert('로그아웃 되었습니다.');
+      window.location.reload();
+    });
+  }
 });

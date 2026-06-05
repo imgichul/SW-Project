@@ -1,19 +1,19 @@
-// localStorage에 저장할 판매글 데이터의 key 값
-const STORAGE_KEY = "campusMarketPosts";
+import {
+  db,
+  collection,
+  addDoc,
+  getDocs,
+  getDoc,
+  doc,
+  updateDoc,
+  deleteDoc,
+  query,
+  orderBy,
+  serverTimestamp
+} from "./firebase.js";
 
 // 거래 상태 값
 const TRADE_STATUSES = ["판매중", "예약중", "거래완료"];
-
-// localStorage에서 판매글 목록을 가져오는 함수
-function getPosts() {
-  const posts = localStorage.getItem(STORAGE_KEY);
-  return posts ? JSON.parse(posts) : [];
-}
-
-// localStorage에 판매글 목록 저장하는 함수
-function savePosts(posts) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
-}
 
 // 가격 표시 형식 변환하는 함수
 function formatPrice(price) {
@@ -33,11 +33,11 @@ function getPostStatus(post) {
 
 // 카테고리별 이미지 문구 반환
 function getCategoryImageText(category) {
-  if (category === "전자기기") return "💻 전자기기 이미지";
-  if (category === "전공책") return "📚 전공책 이미지";
-  if (category === "필기구") return "✏️ 필기구 이미지";
-  if (category === "생활용품") return "🏠 생활용품 이미지";
-  return "🎒 기타 이미지";
+  if (category === "전자기기") return "💻 전자기기";
+  if (category === "전공책") return "📚 전공책";
+  if (category === "필기구") return "✏️ 필기구";
+  if (category === "생활용품") return "🏠 생활용품";
+  return "🎒 기타";
 }
 
 // 카테고리별 배지 클래스 반환
@@ -70,7 +70,69 @@ function readImageFile(file) {
   });
 }
 
-// 판매글 등록 페이지에서 입력한 내용을 읽어 localStorage에 저장하는 함수
+// Firestore Timestamp 또는 문자열 작성일을 화면 표시용으로 변환하는 함수
+function formatCreatedAt(createdAt) {
+  if (!createdAt) {
+    return "작성일 없음";
+  }
+
+  if (createdAt.toDate) {
+    return createdAt.toDate().toLocaleString("ko-KR");
+  }
+
+  return createdAt;
+}
+
+// 정렬 및 날짜 필터를 위해 작성일을 Date 객체로 변환하는 함수
+function getPostDate(post) {
+  if (post.createdAt && post.createdAt.toDate) {
+    return post.createdAt.toDate();
+  }
+
+  if (post.createdDate) {
+    return new Date(post.createdDate);
+  }
+
+  if (post.createdAt) {
+    return new Date(post.createdAt);
+  }
+
+  return new Date(0);
+}
+
+// Firestore에서 판매글 목록을 최신순으로 가져오는 함수
+async function getPostsFromFirestore() {
+  const postsQuery = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+  const querySnapshot = await getDocs(postsQuery);
+
+  const posts = [];
+
+  querySnapshot.forEach(function (docSnap) {
+    posts.push({
+      id: docSnap.id,
+      ...docSnap.data()
+    });
+  });
+
+  return posts;
+}
+
+// Firestore에서 id를 기준으로 판매글 하나를 가져오는 함수
+async function getPostById(postId) {
+  const postRef = doc(db, "posts", postId);
+  const postSnap = await getDoc(postRef);
+
+  if (!postSnap.exists()) {
+    return null;
+  }
+
+  return {
+    id: postSnap.id,
+    ...postSnap.data()
+  };
+}
+
+// 판매글 등록 페이지에서 입력한 내용을 읽어 Firestore에 저장하는 함수
 function initPostCreate() {
   const postForm = document.getElementById("postForm");
 
@@ -85,43 +147,52 @@ function initPostCreate() {
     const price = document.getElementById("price").value.trim();
     const category = document.getElementById("category").value;
     const description = document.getElementById("description").value.trim();
-    const imageFile = document.getElementById("image").files[0];
+    const location = document.getElementById("location").value.trim();
+    const contact = document.getElementById("contact").value.trim();
 
-    if (!title || !price || !category || !description) {
+    const imageInput = document.getElementById("image");
+    const imageFile = imageInput ? imageInput.files[0] : null;
+
+    if (!title || !price || !category || !description || !location || !contact) {
       alert("모든 항목을 입력해주세요.");
       return;
     }
 
     let imageData = "";
 
-    try {
-      imageData = await readImageFile(imageFile);
-    } catch (error) {
-      alert(error);
-      return;
+    if (imageFile) {
+      try {
+        imageData = await readImageFile(imageFile);
+      } catch (error) {
+        alert(error);
+        return;
+      }
     }
 
-    const newPost = {
-      id: Date.now().toString(),
-      title: title,
-      price: price,
-      category: category,
-      description: description,
-      imageData: imageData,
-      status: "판매중",
-      createdAt: new Date().toLocaleString("ko-KR")
-    };
+    try {
+      await addDoc(collection(db, "posts"), {
+        title: title,
+        price: Number(price),
+        category: category,
+        description: description,
+        location: location,
+        contact: contact,
+        imageData: imageData,
+        status: "판매중",
+        createdAt: serverTimestamp(),
+        createdDate: new Date().toISOString().slice(0, 10)
+      });
 
-    const posts = getPosts();
-    posts.unshift(newPost);
-    savePosts(posts);
-
-    alert("판매글이 등록되었습니다.");
-    window.location.href = "posts.html";
+      alert("판매글이 등록되었습니다.");
+      window.location.href = "posts.html";
+    } catch (error) {
+      console.error(error);
+      alert("판매글 등록 중 오류가 발생했습니다.");
+    }
   });
 }
 
-// 판매글 목록 페이지에서 localStorage에 저장된 판매글을 카드 형태로 출력하는 함수
+// 판매글 목록 페이지에서 Firestore에 저장된 판매글을 카드 형태로 출력하는 함수
 function initPostList() {
   const postList = document.getElementById("postList");
 
@@ -134,29 +205,93 @@ function initPostList() {
   const searchBtn = document.getElementById("searchBtn");
   const statusFilter = document.getElementById("statusFilter");
 
+  const filterToggleBtn = document.getElementById("filterToggleBtn");
+  const filterPanel = document.getElementById("filterPanel");
+  const applyFilterBtn = document.getElementById("applyFilterBtn");
+  const resetFilterBtn = document.getElementById("resetFilterBtn");
+
+  const sortSelect = document.getElementById("sortSelect");
+  const minPriceInput = document.getElementById("minPrice");
+  const maxPriceInput = document.getElementById("maxPrice");
+  const startDateInput = document.getElementById("startDate");
+  const endDateInput = document.getElementById("endDate");
+
   let selectedCategory = "전체보기";
 
-  function renderPostList() {
-    const posts = getPosts();
+  async function renderPostList() {
+    let posts = [];
+
+    try {
+      posts = await getPostsFromFirestore();
+    } catch (error) {
+      console.error(error);
+      postList.innerHTML = `
+        <div class="empty-message">
+          판매글을 불러오는 중 오류가 발생했습니다.
+        </div>
+      `;
+      return;
+    }
+
     const keyword = searchInput ? searchInput.value.trim().toLowerCase() : "";
     const selectedStatus = statusFilter ? statusFilter.value : "전체";
 
-    const filteredPosts = posts.filter(function (post) {
+    const sortValue = sortSelect ? sortSelect.value : "latest";
+    const minPrice = minPriceInput && minPriceInput.value ? Number(minPriceInput.value) : 0;
+    const maxPrice = maxPriceInput && maxPriceInput.value ? Number(maxPriceInput.value) : Infinity;
+    const startDate = startDateInput ? startDateInput.value : "";
+    const endDate = endDateInput ? endDateInput.value : "";
+
+    let filteredPosts = posts.filter(function (post) {
       const postStatus = getPostStatus(post);
+      const postPrice = Number(post.price) || 0;
+      const postDate = post.createdDate || getPostDate(post).toISOString().slice(0, 10);
 
       const matchCategory =
         selectedCategory === "전체보기" || post.category === selectedCategory;
 
       const matchKeyword =
         !keyword ||
-        post.title.toLowerCase().includes(keyword) ||
-        post.description.toLowerCase().includes(keyword);
+        String(post.title || "").toLowerCase().includes(keyword) ||
+        String(post.description || "").toLowerCase().includes(keyword) ||
+        String(post.location || "").toLowerCase().includes(keyword);
 
       const matchStatus =
         selectedStatus === "전체" || postStatus === selectedStatus;
 
-      return matchCategory && matchKeyword && matchStatus;
+      const matchPrice =
+        postPrice >= minPrice && postPrice <= maxPrice;
+
+      let matchDate = true;
+
+      if (startDate && postDate < startDate) {
+        matchDate = false;
+      }
+
+      if (endDate && postDate > endDate) {
+        matchDate = false;
+      }
+
+      return matchCategory && matchKeyword && matchStatus && matchPrice && matchDate;
     });
+
+    if (sortValue === "latest") {
+      filteredPosts.sort(function (a, b) {
+        return getPostDate(b) - getPostDate(a);
+      });
+    } else if (sortValue === "oldest") {
+      filteredPosts.sort(function (a, b) {
+        return getPostDate(a) - getPostDate(b);
+      });
+    } else if (sortValue === "priceHigh") {
+      filteredPosts.sort(function (a, b) {
+        return Number(b.price) - Number(a.price);
+      });
+    } else if (sortValue === "priceLow") {
+      filteredPosts.sort(function (a, b) {
+        return Number(a.price) - Number(b.price);
+      });
+    }
 
     postList.innerHTML = "";
 
@@ -188,7 +323,8 @@ function initPostList() {
           <h3 class="product-title">${post.title}</h3>
           <div class="product-price">${formatPrice(post.price)}</div>
           <div class="product-meta">
-            <span>${post.createdAt}</span>
+            <span>${formatCreatedAt(post.createdAt)}</span>
+            <span>${post.location || "장소 미정"}</span>
           </div>
         </div>
       `;
@@ -227,11 +363,32 @@ function initPostList() {
     statusFilter.addEventListener("change", renderPostList);
   }
 
+  if (filterToggleBtn && filterPanel) {
+    filterToggleBtn.addEventListener("click", function () {
+      filterPanel.classList.toggle("hidden");
+    });
+  }
+
+  if (applyFilterBtn) {
+    applyFilterBtn.addEventListener("click", renderPostList);
+  }
+
+  if (resetFilterBtn) {
+    resetFilterBtn.addEventListener("click", function () {
+      if (sortSelect) sortSelect.value = "latest";
+      if (minPriceInput) minPriceInput.value = "";
+      if (maxPriceInput) maxPriceInput.value = "";
+      if (startDateInput) startDateInput.value = "";
+      if (endDateInput) endDateInput.value = "";
+      renderPostList();
+    });
+  }
+
   renderPostList();
 }
 
 // 판매글 상세 페이지에서 URL의 id 값을 기준으로 해당 판매글을 찾아 출력하는 함수
-function initPostDetail() {
+async function initPostDetail() {
   const detailArea = document.getElementById("detailArea");
 
   if (!detailArea) {
@@ -239,11 +396,7 @@ function initPostDetail() {
   }
 
   const postId = getPostIdFromUrl();
-  const posts = getPosts();
-
-  const post = posts.find(function (item) {
-    return item.id === postId;
-  });
+  const post = await getPostById(postId);
 
   if (!post) {
     detailArea.innerHTML = `
@@ -280,7 +433,9 @@ function renderPostDetail(post) {
         <h2>${post.title}</h2>
         <div class="detail-price">${formatPrice(post.price)}</div>
 
-        <p><strong>작성일</strong> ${post.createdAt}</p>
+        <p><strong>작성일</strong> ${formatCreatedAt(post.createdAt)}</p>
+        <p><strong>거래 장소</strong> ${post.location || "장소 미정"}</p>
+        <p><strong>연락처</strong> ${post.contact || "연락처 미입력"}</p>
 
         <div class="status-change-box">
           <label for="tradeStatus"><strong>거래 상태</strong></label>
@@ -320,7 +475,7 @@ function renderPostDetail(post) {
 }
 
 // 거래 상태 변경 기능
-function updateTradeStatus(postId) {
+async function updateTradeStatus(postId) {
   const tradeStatus = document.getElementById("tradeStatus");
 
   if (!tradeStatus) {
@@ -335,26 +490,20 @@ function updateTradeStatus(postId) {
     return;
   }
 
-  const posts = getPosts();
+  try {
+    await updateDoc(doc(db, "posts", postId), {
+      status: selectedStatus
+    });
 
-  const postIndex = posts.findIndex(function (post) {
-    return post.id === postId;
-  });
-
-  if (postIndex === -1) {
-    alert("판매글을 찾을 수 없습니다.");
-    return;
+    alert("거래 상태가 변경되었습니다.");
+    window.location.href = "post-detail.html?id=" + postId;
+  } catch (error) {
+    console.error(error);
+    alert("거래 상태 변경 중 오류가 발생했습니다.");
   }
-
-  posts[postIndex].status = selectedStatus;
-  savePosts(posts);
-
-  alert("거래 상태가 변경되었습니다.");
-  window.location.href = "post-detail.html?id=" + postId;
 }
 
 // 판매글 수정 기능
-// 상세 페이지의 수정 폼에서 입력한 내용으로 기존 판매글 데이터를 갱신하는 함수
 function initPostEdit(post) {
   const editForm = document.getElementById("editForm");
   const cancelEditBtn = document.getElementById("cancelEditBtn");
@@ -366,48 +515,49 @@ function initPostEdit(post) {
   editForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
-    const posts = getPosts();
-
-    const postIndex = posts.findIndex(function (item) {
-      return item.id === post.id;
-    });
-
-    if (postIndex === -1) {
-      alert("수정할 판매글을 찾을 수 없습니다.");
-      return;
-    }
-
     const editTitle = document.getElementById("editTitle").value.trim();
     const editPrice = document.getElementById("editPrice").value.trim();
     const editCategory = document.getElementById("editCategory").value;
+    const editLocation = document.getElementById("editLocation").value.trim();
+    const editContact = document.getElementById("editContact").value.trim();
     const editDescription = document.getElementById("editDescription").value.trim();
     const editStatus = document.getElementById("editStatus");
-    const editImageFile = document.getElementById("editImage").files[0];
+    const editImageInput = document.getElementById("editImage");
+    const editImageFile = editImageInput ? editImageInput.files[0] : null;
 
-    if (!editTitle || !editPrice || !editCategory || !editDescription) {
+    if (!editTitle || !editPrice || !editCategory || !editDescription || !editLocation || !editContact) {
       alert("모든 항목을 입력해주세요.");
       return;
     }
 
-    posts[postIndex].title = editTitle;
-    posts[postIndex].price = editPrice;
-    posts[postIndex].category = editCategory;
-    posts[postIndex].status = editStatus ? editStatus.value : getPostStatus(posts[postIndex]);
-    posts[postIndex].description = editDescription;
+    const updatedPost = {
+      title: editTitle,
+      price: Number(editPrice),
+      category: editCategory,
+      location: editLocation,
+      contact: editContact,
+      status: editStatus ? editStatus.value : getPostStatus(post),
+      description: editDescription
+    };
 
     if (editImageFile) {
       try {
-        posts[postIndex].imageData = await readImageFile(editImageFile);
+        updatedPost.imageData = await readImageFile(editImageFile);
       } catch (error) {
         alert(error);
         return;
       }
     }
 
-    savePosts(posts);
+    try {
+      await updateDoc(doc(db, "posts", post.id), updatedPost);
 
-    alert("판매글이 수정되었습니다.");
-    window.location.href = "post-detail.html?id=" + post.id;
+      alert("판매글이 수정되었습니다.");
+      window.location.href = "post-detail.html?id=" + post.id;
+    } catch (error) {
+      console.error(error);
+      alert("판매글 수정 중 오류가 발생했습니다.");
+    }
   });
 
   if (cancelEditBtn) {
@@ -426,6 +576,8 @@ function showEditForm(post) {
   document.getElementById("editTitle").value = post.title;
   document.getElementById("editPrice").value = post.price;
   document.getElementById("editCategory").value = post.category;
+  document.getElementById("editLocation").value = post.location || "";
+  document.getElementById("editContact").value = post.contact || "";
 
   const editStatus = document.getElementById("editStatus");
   if (editStatus) {
@@ -436,24 +588,22 @@ function showEditForm(post) {
 }
 
 // 판매글 삭제 기능
-// 선택한 판매글을 localStorage에서 삭제하는 함수
-function deletePost(postId) {
+async function deletePost(postId) {
   const confirmDelete = confirm("정말 이 판매글을 삭제하시겠습니까?");
 
   if (!confirmDelete) {
     return;
   }
 
-  const posts = getPosts();
+  try {
+    await deleteDoc(doc(db, "posts", postId));
 
-  const updatedPosts = posts.filter(function (post) {
-    return post.id !== postId;
-  });
-
-  savePosts(updatedPosts);
-
-  alert("판매글이 삭제되었습니다.");
-  window.location.href = "posts.html";
+    alert("판매글이 삭제되었습니다.");
+    window.location.href = "posts.html";
+  } catch (error) {
+    console.error(error);
+    alert("판매글 삭제 중 오류가 발생했습니다.");
+  }
 }
 
 // 페이지 로드가 완료되면 현재 페이지에 필요한 기능만 실행.

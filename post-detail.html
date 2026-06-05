@@ -24,7 +24,7 @@
         <input type="text" id="editTitle" required>
 
         <label for="editPrice">가격</label>
-        <input type="number" id="editPrice" required>
+        <input type="number" id="editPrice" min="0" step="1000" required>
 
         <label for="editCategory">카테고리</label>
         <select id="editCategory" required>
@@ -34,6 +34,12 @@
           <option value="생활용품">생활용품</option>
           <option value="기타">기타</option>
         </select>
+
+        <label for="editLocation">거래 희망 장소</label>
+        <input type="text" id="editLocation" required>
+
+        <label for="editContact">연락처</label>
+        <input type="text" id="editContact" required>
 
         <!-- 새 사진을 선택하면 기존 상품 사진을 변경할 수 있음 -->
         <label for="editImage">상품 사진 변경</label>
@@ -55,7 +61,10 @@
     </div>
   </main>
 
-  <script src="js/storage.js"></script>
-  <script src="js/posts.js"></script>
+  <footer class="footer">
+    <p>© 2026 Campus Market. All rights reserved.</p>
+  </footer>
+
+  <script type="module" src="js/posts.js"></script>
 </body>
 </html>
