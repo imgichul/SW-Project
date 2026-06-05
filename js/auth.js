@@ -95,3 +95,42 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    // 1. 로그인 상태 확인 (세션스토리지 예시)
+    const isLoggedIn = sessionStorage.getItem("isLoggedIn") === "true";
+
+    // 2. 상단 우측 로그인 버튼 동적 제어
+    const loginBtnContainer = document.querySelector("header div[style*='position: absolute']");
+    if (loginBtnContainer) {
+        if (isLoggedIn) {
+            // 로그인 상태면 '로그아웃' 버튼으로 변경
+            loginBtnContainer.innerHTML = `
+                <a href="#" id="logoutBtn" style="text-decoration: none; color: #fff; font-weight: bold; background: #ff4d4d; padding: 8px 15px; border-radius: 5px; font-size: 14px;">로그아웃 🚪</a>
+            `;
+            
+            // 로그아웃 이벤트 등록
+            document.getElementById("logoutBtn").addEventListener("click", function (e) {
+                e.preventDefault();
+                sessionStorage.removeItem("isLoggedIn");
+                alert("로그아웃 되었습니다.");
+                location.reload(); // 페이지 새로고침
+            });
+        }
+    }
+
+    // 3. 메인 버튼 (판매글 보러가기, 판매글 등록하기) 클릭 이벤트 가로채기
+    const mainButtons = document.querySelectorAll(".main-buttons .main-btn");
+    
+    mainButtons.forEach(button => {
+        button.addEventListener("click", function (e) {
+            // 만약 로그인이 안 되어 있다면 원래 가려던 링크(href) 이동을 막음
+            if (!isLoggedIn) {
+                e.preventDefault(); 
+                alert("로그인이 필요한 서비스입니다. 로그인 페이지로 이동합니다.");
+                window.location.href = "login.html"; // 로그인 페이지로 튕기기
+            }
+        });
+    });
+});
