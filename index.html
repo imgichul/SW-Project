@@ -9,7 +9,7 @@
 <body>
 
   <header style="position: relative;">
-    <div style="position: absolute; top: 20px; right: 20px;">
+    <div id="authArea" style="position: absolute; top: 20px; right: 20px;">
       <a href="login.html" style="text-decoration: none; color: #333; font-weight: bold; background: #fff; padding: 8px 15px; border-radius: 5px; border: 1px solid #ddd; font-size: 14px;">로그인하기 👤</a>
     </div>
 
@@ -18,7 +18,8 @@
   </header>
 
   <div class="container">
-    <div class="main-intro">   <h2>캠퍼스 안에서 쉽고 안전하게 중고거래하세요</h2>
+    <div class="main-intro">
+      <h2>캠퍼스 안에서 쉽고 안전하게 중고거래하세요</h2>
       <p>
         전공책, 전자기기, 필기구 등 학교 생활에 필요한 물품을 등록하고 확인할 수 있습니다.
       </p>
@@ -28,54 +29,54 @@
         <a href="post-new.html" class="main-btn secondary-btn">판매글 등록하기</a>
       </div>
     </div>
-     <section class="guide-section">  <h2>이용 방법</h2>
+    
+    <section class="guide-section">
+      <h2>이용 방법</h2>
+      <div class="guide-grid">
+        <div class="guide-card">
+          <div class="guide-icon">📝</div>
+          <h3>1. 판매글 등록</h3>
+          <p>판매할 물품의 제목, 가격, 카테고리, 설명과 사진을 입력합니다.</p>
+        </div>
 
-    <div class="guide-grid">
-      <div class="guide-card">
-        <div class="guide-icon">📝</div>
-        <h3>1. 판매글 등록</h3>
-        <p>판매할 물품의 제목, 가격, 카테고리, 설명과 사진을 입력합니다.</p>
+        <div class="guide-card">
+          <div class="guide-icon">🔍</div>
+          <h3>2. 물품 확인</h3>
+          <p>등록된 판매글을 목록에서 확인하고, 카테고리별로 살펴볼 수 있습니다.</p>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-icon">🤝</div>
+          <h3>3. 교내 거래</h3>
+          <p>학교 안에서 필요한 물품을 안전하고 편리하게 거래할 수 있습니다.</p>
+        </div>
       </div>
+    </section>
 
-      <div class="guide-card">
-        <div class="guide-icon">🔍</div>
-        <h3>2. 물품 확인</h3>
-        <p>등록된 판매글을 목록에서 확인하고, 카테고리별로 살펴볼 수 있습니다.</p>
-      </div>
-
-      <div class="guide-card">
-        <div class="guide-icon">🤝</div>
-        <h3>3. 교내 거래</h3>
-        <p>학교 안에서 필요한 물품을 안전하고 편리하게 거래할 수 있습니다.</p>
+    <div class="category-info-section"> 
+      <h2>주요 거래 카테고리</h2>
+      <div class="category-info-grid">
+        <div class="category-info-card">💻 전자기기</div>
+        <div class="category-info-card">📚 전공책</div>
+        <div class="category-info-card">✏️ 필기구</div>
+        <div class="category-info-card">🏠 생활용품</div>
+        <div class="category-info-card">🎒 기타</div>
       </div>
     </div>
-  </section>
 
-   <div class="category-info-section"> 
-    <h2>주요 거래 카테고리</h2>
+    <section class="contact-section">
+      <h2>관리자 연락처</h2>
+      <p>
+        서비스 이용 중 오류가 발생하거나 문의사항이 있는 경우 관리자에게 연락해주세요.
+      </p>
+      <div class="contact-box">
+        <p><strong>담당자</strong>김세종</p>
+        <p><strong>이메일</strong> sejongkim@email.com</p>
+      </div>
+    </section>
+  </div>  
 
-    <div class="category-info-grid">
-      <div class="category-info-card">💻 전자기기</div>
-      <div class="category-info-card">📚 전공책</div>
-      <div class="category-info-card">✏️ 필기구</div>
-      <div class="category-info-card">🏠 생활용품</div>
-      <div class="category-info-card">🎒 기타</div>
-    </div>
-  </div>
-
-  <section class="contact-section">
-  <h2>관리자 연락처</h2>
-  <p>
-    서비스 이용 중 오류가 발생하거나 문의사항이 있는 경우 관리자에게 연락해주세요.
-  </p>
-
-  <div class="contact-box">
-    <p><strong>담당자</strong>김세종</p>
-    <p><strong>이메일</strong> sejongkim@email.com</p>
-  </div>
-</section>
-</div>  
-
+  <script src="js/auth.js"></script>
   <script src="js/posts.js"></script>
 </body>
 </html>
