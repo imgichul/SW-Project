@@ -31,6 +31,37 @@ function getPostStatus(post) {
   return post.status || "판매중";
 }
 
+// 현재 로그인한 사용자 정보를 가져오는 함수
+function getCurrentUser() {
+  const currentUser = localStorage.getItem("currentUser");
+
+  if (!currentUser) {
+    return null;
+  }
+
+  const userData = JSON.parse(localStorage.getItem(currentUser));
+
+  if (!userData) {
+    return null;
+  }
+
+  return {
+    id: currentUser,
+    nickname: userData.nickname || "사용자"
+  };
+}
+
+// 현재 로그인한 사용자가 해당 판매글 작성자인지 확인하는 함수
+function isPostOwner(post) {
+  const currentUser = getCurrentUser();
+
+  if (!currentUser) {
+    return false;
+  }
+
+  return currentUser.id === post.writerId;
+}
+
 // 카테고리별 이미지 문구 반환
 function getCategoryImageText(category) {
   if (category === "전자기기") return "💻 전자기기";
@@ -158,6 +189,14 @@ function initPostCreate() {
       return;
     }
 
+    const currentUser = getCurrentUser();
+
+    if (!currentUser) {
+      alert("로그인 후 판매글을 등록할 수 있습니다.");
+      window.location.href = "login.html";
+      return;
+    }
+
     let imageData = "";
 
     if (imageFile) {
@@ -179,6 +218,8 @@ function initPostCreate() {
         contact: contact,
         imageData: imageData,
         status: "판매중",
+        writerId: currentUser.id,
+        writerNickname: currentUser.nickname,
         createdAt: serverTimestamp(),
         createdDate: new Date().toISOString().slice(0, 10)
       });
@@ -416,6 +457,7 @@ async function initPostDetail() {
 // 상세 화면 출력
 function renderPostDetail(post) {
   const detailArea = document.getElementById("detailArea");
+  const owner = isPostOwner(post);
 
   detailArea.innerHTML = `
     <div class="detail-box">
@@ -436,16 +478,23 @@ function renderPostDetail(post) {
         <p><strong>작성일</strong> ${formatCreatedAt(post.createdAt)}</p>
         <p><strong>거래 장소</strong> ${post.location || "장소 미정"}</p>
         <p><strong>연락처</strong> ${post.contact || "연락처 미입력"}</p>
+        <p><strong>작성자</strong> ${post.writerNickname || "작성자 없음"}</p>
 
-        <div class="status-change-box">
-          <label for="tradeStatus"><strong>거래 상태</strong></label>
-          <select id="tradeStatus">
-            <option value="판매중" ${getPostStatus(post) === "판매중" ? "selected" : ""}>판매중</option>
-            <option value="예약중" ${getPostStatus(post) === "예약중" ? "selected" : ""}>예약중</option>
-            <option value="거래완료" ${getPostStatus(post) === "거래완료" ? "selected" : ""}>거래완료</option>
-          </select>
-          <button id="statusUpdateBtn" class="submit-btn">상태 변경</button>
-        </div>
+        ${
+          owner
+            ? `
+            <div class="status-change-box">
+             <label for="tradeStatus"><strong>거래 상태</strong></label>
+             <select id="tradeStatus">
+              <option value="판매중" ${getPostStatus(post) === "판매중" ? "selected" : ""}>판매중</option>
+              <option value="예약중" ${getPostStatus(post) === "예약중" ? "selected" : ""}>예약중</option>
+              <option value="거래완료" ${getPostStatus(post) === "거래완료" ? "selected" : ""}>거래완료</option>
+             </select>
+             <button id="statusUpdateBtn" class="submit-btn">상태 변경</button>
+            </div>
+          `
+          : ""
+        }
 
         <div class="detail-description">
           <h3>상품 설명</h3>
@@ -453,8 +502,14 @@ function renderPostDetail(post) {
         </div>
 
         <div class="detail-buttons">
-          <button id="editBtn" class="submit-btn">수정</button>
-          <button id="deleteBtn" class="delete-btn">삭제</button>
+          ${
+            owner
+              ? `
+                <button id="editBtn" class="submit-btn">수정</button>
+                <button id="deleteBtn" class="delete-btn">삭제</button>
+              `
+              : ""
+          }
           <a href="posts.html" class="back-link">목록으로</a>
         </div>
       </div>
@@ -462,7 +517,7 @@ function renderPostDetail(post) {
   `;
 
   document.getElementById("statusUpdateBtn").addEventListener("click", function () {
-    updateTradeStatus(post.id);
+    updateTradeStatus(post);
   });
 
   document.getElementById("editBtn").addEventListener("click", function () {
@@ -470,12 +525,17 @@ function renderPostDetail(post) {
   });
 
   document.getElementById("deleteBtn").addEventListener("click", function () {
-    deletePost(post.id);
+    deletePost(post);
   });
 }
 
 // 거래 상태 변경 기능
-async function updateTradeStatus(postId) {
+async function updateTradeStatus(post) {
+  if (!isPostOwner(post)) {
+    alert("본인이 작성한 판매글만 거래 상태를 변경할 수 있습니다.");
+    return;
+  }
+  
   const tradeStatus = document.getElementById("tradeStatus");
 
   if (!tradeStatus) {
@@ -514,6 +574,11 @@ function initPostEdit(post) {
 
   editForm.addEventListener("submit", async function (event) {
     event.preventDefault();
+
+    if (!isPostOwner(post)) {
+      alert("본인이 작성한 판매글만 수정할 수 있습니다.");
+      return;
+    }
 
     const editTitle = document.getElementById("editTitle").value.trim();
     const editPrice = document.getElementById("editPrice").value.trim();
@@ -588,7 +653,12 @@ function showEditForm(post) {
 }
 
 // 판매글 삭제 기능
-async function deletePost(postId) {
+async function deletePost(post) {
+  if (!isPostOwner(post)) {
+    alert("본인이 작성한 판매글만 삭제할 수 있습니다.");
+    return;
+  }
+
   const confirmDelete = confirm("정말 이 판매글을 삭제하시겠습니까?");
 
   if (!confirmDelete) {
