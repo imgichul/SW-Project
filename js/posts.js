@@ -666,7 +666,7 @@ async function deletePost(post) {
   }
 
   try {
-    await deleteDoc(doc(db, "posts", postId));
+    await deleteDoc(doc(db, "posts", post.id));
 
     alert("판매글이 삭제되었습니다.");
     window.location.href = "posts.html";
