@@ -3,6 +3,27 @@
 document.addEventListener('DOMContentLoaded', () => {
 
   // ==========================================
+  // 0. 로그인 비밀번호 보기 / 숨기기 기능
+  // ==========================================
+  const passwordInput = document.getElementById('password');
+  const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+  const togglePasswordIcon = document.getElementById('togglePasswordIcon');
+
+  if (passwordInput && togglePasswordBtn && togglePasswordIcon) {
+    togglePasswordBtn.addEventListener('click', function () {
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        togglePasswordIcon.textContent = '🙉';
+        togglePasswordBtn.setAttribute('aria-label', '비밀번호 숨기기');
+      } else {
+        passwordInput.type = 'password';
+        togglePasswordIcon.textContent = '🙈';
+        togglePasswordBtn.setAttribute('aria-label', '비밀번호 보기');
+      }
+    });
+  }
+
+  // ==========================================
   // 1. 회원가입 로직 (signup.html)
   // ==========================================
   const signupForm = document.getElementById('signupForm');
@@ -56,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const userData = JSON.parse(storedUser);
         
         if (userData.password === password) {
-          // 🎉 로그인 성공 시 'currentUser'에 유저 아이디 저장
+          // 로그인 성공 시 currentUser에 유저 아이디 저장
           localStorage.setItem('currentUser', username);
           alert(`환영합니다, ${userData.nickname}님! 로그인이 완료되었습니다.`);
           window.location.href = 'index.html'; 
@@ -74,12 +95,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // ==========================================
   const currentUser = localStorage.getItem('currentUser');
   
-  // 헤더나 메인에 존재하는 로그인 링크/컨테이너 탐색
   const loginLink = document.querySelector('a[href="login.html"]'); 
   const loginBtnContainer = document.querySelector("header div[style*='position: absolute']");
 
   if (currentUser) {
-    // [로그인 상태일 때 UI 변경]
     const userData = JSON.parse(localStorage.getItem(currentUser)) || { nickname: "사용자" };
 
     if (loginLink) {
@@ -94,19 +113,17 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
     }
 
-    // 🔥 로그아웃 버튼 이벤트 바인딩 (수정 완료)
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
       logoutBtn.addEventListener('click', function(e) {
         e.preventDefault();
-        localStorage.removeItem('currentUser'); // 1. 로그인 기록 삭제
+        localStorage.removeItem('currentUser');
         alert('로그아웃 되었습니다. 로그인 페이지로 이동합니다.');
-        window.location.href = 'login.html'; // 2. 뼈 때리는 리다이렉트 추가!
+        window.location.href = 'login.html';
       });
     }
 
   } else {
-    // [비로그인 상태일 때 판매글 관련 버튼 클릭 가로채기 차단막]
     const mainButtons = document.querySelectorAll(".main-buttons .main-btn");
     mainButtons.forEach(button => {
       button.addEventListener("click", function (e) {
